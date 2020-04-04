@@ -1,3 +1,17 @@
+/* Programa para control de válvula del respirador VentFree. 
+ * Dispone de dos potenciómetros en las entradas A0 y A1 para controlar la frecuencia de las maniobras de 10 a 60 veces por minuto,
+ * Dicha frecuencia se traducirá en el tiempo en el que el servo debe permanecer en la posición de 'espirando' o 'inspirando' en una relación 2 a 1 
+ * Es decir, 2 partes del tiempo estará en 'espirando' y 1 en inspirando.
+ * Además, se añade el potenciómero del peep, que indicará cuantos grados de apertura debe tener en la posición de 'espirando' para que siempre tenga una
+ * pequeña entrada de aire.
+ *
+ * @Author: Hugo Alonso Sobrino
+ * @e-mail: halonso73@gmail.com
+ * @Version: 1.0
+ * 
+*/
+
+
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 #include <Servo.h>
@@ -8,14 +22,14 @@ LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 20 chars
 #define PIN_FREQ A0 //Potenciometro de frecuencia
 #define PIN_PEEP A1 //Potenciometro PEEP
 #define PIN_LED 6
-#define EXPIRANDO  0
+#define ESPIRANDO  0
 #define INSPIRANDO  1
 #define MIN_ANGLE 92 // Ángulo de apertura de inspiración
-#define MAX_ANGLE 139 // Ángulo de apertura de expiración
+#define MAX_ANGLE 139 // Ángulo de apertura de espiración
 
 int frecuencia = 0;
 int valInspira = 0;//Tiempo de inspiración
-int valExpira = 0;//Tiempo de expiración
+int valEspira = 0;//Tiempo de espiración
 int valPeep = 0; // Grados de peep
 int aux; // Variable auxiliar 
 unsigned long time;
@@ -29,7 +43,7 @@ void setServo()
 {
 	if ( millis() > time )
 	{
-		if ( estado == EXPIRANDO )
+		if ( estado == ESPIRANDO )
 		{
 			// Pasar a inspirando
 			digitalWrite(PIN_LED,HIGH);
@@ -39,11 +53,11 @@ void setServo()
 		}
 		else if ( estado == INSPIRANDO )
 		{
-			// Pasar a expirando
+			// Pasar a espirando
 			digitalWrite(PIN_LED,LOW);
 			myServo.write(MAX_ANGLE - valPeep);
-			time = millis() + (valExpira * 100);
-			estado = EXPIRANDO;
+			time = millis() + (valEspira * 100);
+			estado = ESPIRANDO;
 		}
 	}
 }
@@ -61,7 +75,7 @@ void setup()
 	lcd.init();
   lcd.backlight();
 	delay(3000);
-	estado=EXPIRANDO;
+	estado=ESPIRANDO;
   
 }
 
@@ -73,9 +87,9 @@ void loop()
 	frecuencia = map(aux,0,1023, 10, 60); // Mapeo del potiencimetro a operaciones por minuto
 	// Convertimos esas operaciones por minuto a tiempo de espera de cada operación en décimas de segundo.
 	valInspira = ((1.0 / frecuencia )* 600.0 ) * (1.0/3.0);
-	valExpira = ((1.0 / frecuencia ) * 600.0 ) * (2.0/3.0);
+	valEspira = ((1.0 / frecuencia ) * 600.0 ) * (2.0/3.0);
 	
-	//expira
+	//espira
 	aux = analogRead(PIN_PEEP); // Leer el valor del potenciometro
 	valPeep = map(aux,0,1023, 0, 10); // Mapeo del potiencimetro a valores en grados de apertura para el peep.
 	
@@ -87,8 +101,8 @@ void loop()
 		Serial.println(frecuencia);
 		Serial.print("Inspira: ");
 		Serial.println(valInspira);
-		Serial.print("Expira: ");
-		Serial.println(valExpira);
+		Serial.print("Espira: ");
+		Serial.println(valEspira);
 		Serial.print("Peep: ");
 		Serial.println(valPeep);
 		// Se escribe el lcd

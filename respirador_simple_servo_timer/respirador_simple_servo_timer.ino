@@ -36,6 +36,8 @@ unsigned long time;
 Servo myServo;
 int frecuencia_ant;
 int valPeep_ant;
+char aux_f[3];
+char aux_p[3];
 
 int estado;
 
@@ -96,24 +98,26 @@ void loop()
 	// escribir valores solo si hay algún cambio
   if ( (frecuencia_ant != frecuencia) || (valPeep_ant != valPeep))
 	{
-    
-		Serial.print("Frecuencia: ");
-		Serial.println(frecuencia);
+  
+    sprintf(aux_f,"%2d",frecuencia);
+    sprintf(aux_p,"%2d",valPeep);
+    Serial.print("Frecuencia: ");
+		Serial.println(aux_f);
 		Serial.print("Inspira: ");
 		Serial.println(valInspira);
 		Serial.print("Espira: ");
 		Serial.println(valEspira);
 		Serial.print("Peep: ");
-		Serial.println(valPeep);
+		Serial.println(aux_p);
 		// Se escribe el lcd
 		lcd.setCursor(0, 0);
 		lcd.print("FRECUENCIA: ");
 		lcd.setCursor(13, 0);
-		lcd.print(frecuencia);
+		lcd.print(aux_f);
 		lcd.setCursor(0, 1);
 		lcd.print("PEEP:  ");
 		lcd.setCursor(13, 1);
-		lcd.print(valPeep);
+		lcd.print(aux_p);
     frecuencia_ant = frecuencia;
     valPeep_ant = valPeep;
 	}

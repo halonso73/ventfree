@@ -86,7 +86,7 @@ void loop()
 	// Leer los valores de los potenciometros en cada pasada
 	// Inspira
 	aux = analogRead(PIN_FREQ); // Leer el valor del potenciometro
-	frecuencia = map(aux,0,1023, 10, 60); // Mapeo del potiencimetro a operaciones por minuto
+	frecuencia = map(aux,0,1023, 5, 60); // Mapeo del potiencimetro a operaciones por minuto
 	// Convertimos esas operaciones por minuto a tiempo de espera de cada operación en décimas de segundo.
 	valInspira = ((1.0 / frecuencia )* 600.0 ) * (1.0/3.0);
 	valEspira = ((1.0 / frecuencia ) * 600.0 ) * (2.0/3.0);

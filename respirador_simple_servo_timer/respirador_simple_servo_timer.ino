@@ -36,6 +36,7 @@ LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 20 chars
 #define MENSAJE_ESPIRACION 2
 #define MENSAJE_INSPIRACION 3
 #define FIN 4
+#define SECONDSLIGHT 5
 
 //angulos por defecto del servo
 #define DEFAULT_MIN_ANGLE 92 // Ángulo de apertura de inspiración
@@ -47,6 +48,7 @@ int valEspira = 0;//Tiempo de espiración
 int valPeep = 0; // Grados de peep
 int aux; // Variable auxiliar 
 unsigned long time;
+unsigned long lightTime;
 Servo myServo;
 int frecuencia_ant;
 int valPeep_ant;
@@ -54,6 +56,7 @@ char aux_f[3];
 char aux_p[3];
 int min_angle = DEFAULT_MIN_ANGLE;
 int max_angle = DEFAULT_MAX_ANGLE;
+int light=0;
 
 
 int estado;
@@ -80,44 +83,57 @@ void setServo()
 			estado = ESPIRANDO;
 		}
 	}
+
+  if ( millis() > lightTime )
+  {
+    lcd.noBacklight();
+  }
 }
 
 void setup() 
 {
   int configurado;
   pinMode(PIN_CONFIG, INPUT);
-  myServo.attach(PIN_SERVO);
-  myServo.write(120);
-  digitalWrite(PIN_LED,LOW);
-	pinMode(PIN_LED,OUTPUT);
-	Serial.begin(9600);//set the serial communication baudrate as 9600
-	time = millis();
-  frecuencia_ant=-1;
-  valPeep_ant=-1;
-	lcd.init();
-  lcd.backlight();
-	delay(3000);
-	estado=ESPIRANDO;
-  config = digitalRead(PIN_CONFIG);
-  Serial.print("Estado de configuración???");
-  Serial.println(config);
-  Serial.print("Valor de max_angle: ");
-  Serial.println(EEPROM.read(0));
-  Serial.print("Valor de min_angle: ");
-  Serial.println(EEPROM.read(1));
+
+  // Read configration values
+  
   configurado = EEPROM.read(2);
-  Serial.print("Valor de configurado:");
+  Serial.print("Valor de la posición configurado:");
   Serial.println(EEPROM.read(2));
   if ( configurado == 128 )
   {
     max_angle = EEPROM.read(0);
     min_angle = EEPROM.read(1);
   }
+  myServo.attach(PIN_SERVO);
+  myServo.write((min_angle + max_angle) / 2);
+  digitalWrite(PIN_LED,LOW);
+	pinMode(PIN_LED,OUTPUT);
+	Serial.begin(9600);//set the serial communication baudrate as 9600
+	time = millis();
+  Serial.print("Valor de max_angle: ");
+  Serial.println(max_angle);
+  Serial.print("Valor de min_angle: ");
+  Serial.println(min_angle);
+
+  frecuencia_ant=-1;
+  valPeep_ant=-1;
+	lcd.init();
+  lcd.backlight();
+	Serial.println("Pulsar botón para configurar");
+  delay(3000);
+	estado=ESPIRANDO;
   
+  // Se chequea el botón para ver si pasamos a modo de configuración o no.
+  //config = digitalRead(PIN_CONFIG);
+  config = 0;
+  Serial.print("Estado de configuración: ");
+  Serial.println(config);
   if ( config )
     estado = MENSAJE_ESPIRACION;
   delay(5000);
   attachInterrupt(digitalPinToInterrupt(PIN_CONFIG),buttom, FALLING);
+  lightTime = millis() + (SECONDSLIGHT*1000);
 }
 
 
@@ -138,7 +154,7 @@ void main_loop()
 	// escribir valores solo si hay algún cambio
   if ( (frecuencia_ant != frecuencia) || (valPeep_ant != valPeep))
 	{
-  
+    lcd.backlight();
     sprintf(aux_f,"%2d",frecuencia);
     sprintf(aux_p,"%2d",valPeep);
     Serial.print("Frecuencia: ");
@@ -160,6 +176,7 @@ void main_loop()
 		lcd.print(aux_p);
     frecuencia_ant = frecuencia;
     valPeep_ant = valPeep;
+    lightTime = millis()+(SECONDSLIGHT*1000);
 	}
 	
 	setServo();

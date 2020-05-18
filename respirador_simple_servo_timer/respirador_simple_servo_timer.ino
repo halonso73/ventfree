@@ -27,7 +27,8 @@ LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 20 chars
 #define PIN_SERVO 10 // Servo
 #define PIN_FREQ A0 //Potenciometro de frecuencia
 #define PIN_PEEP A1 //Potenciometro PEEP
-#define PIN_CONFIG 3 // Botón/interruptor de configuración
+//#define PIN_CONFIG 3 // Botón/interruptor de configuración
+#define PIN_CONFIG -1 // Botón/interruptor de configuración, -1 es que no existe.
 #define PIN_LED 6
 
 //estados
@@ -93,7 +94,8 @@ void setServo()
 void setup() 
 {
   int configurado;
-  pinMode(PIN_CONFIG, INPUT);
+  if ( PIN_CONFIG > 0)
+    pinMode(PIN_CONFIG, INPUT);
 
   // Read configration values
   
@@ -125,14 +127,18 @@ void setup()
 	estado=ESPIRANDO;
   
   // Se chequea el botón para ver si pasamos a modo de configuración o no.
-  //config = digitalRead(PIN_CONFIG);
-  config = 0;
+  if ( PIN_CONFIG > 0)
+    config = digitalRead(PIN_CONFIG);
+  else
+    config = 0;
   Serial.print("Estado de configuración: ");
   Serial.println(config);
   if ( config )
+  {
     estado = MENSAJE_ESPIRACION;
-  delay(5000);
-  attachInterrupt(digitalPinToInterrupt(PIN_CONFIG),buttom, FALLING);
+    delay(5000);
+    attachInterrupt(digitalPinToInterrupt(PIN_CONFIG),buttom, FALLING);
+  }
   lightTime = millis() + (SECONDSLIGHT*1000);
 }
 

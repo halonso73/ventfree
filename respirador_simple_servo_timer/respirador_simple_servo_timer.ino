@@ -27,8 +27,8 @@ LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 20 chars
 #define PIN_SERVO 10 // Servo
 #define PIN_FREQ A0 //Potenciometro de frecuencia
 #define PIN_PEEP A1 //Potenciometro PEEP
-//#define PIN_CONFIG 3 // Botón/interruptor de configuración
-#define PIN_CONFIG -1 // Botón/interruptor de configuración, -1 es que no existe.
+#define PIN_CONFIG 3 // Botón/interruptor de configuración
+//#define PIN_CONFIG -1 // Botón/interruptor de configuración, -1 es que no existe.
 #define PIN_LED 6
 
 //estados
@@ -55,6 +55,7 @@ int frecuencia_ant;
 int valPeep_ant;
 char aux_f[3];
 char aux_p[3];
+char aux_angle[4];
 int min_angle = DEFAULT_MIN_ANGLE;
 int max_angle = DEFAULT_MAX_ANGLE;
 int light=0;
@@ -136,7 +137,7 @@ void setup()
   if ( config )
   {
     estado = MENSAJE_ESPIRACION;
-    delay(5000);
+    delay(3000);
     attachInterrupt(digitalPinToInterrupt(PIN_CONFIG),buttom, FALLING);
   }
   lightTime = millis() + (SECONDSLIGHT*1000);
@@ -198,12 +199,20 @@ void config_loop()
   {
     Serial.println("Coloque el servo, regulación de la posición ESPIRANDO");
     Serial.println("Cuando tenga el ángulo, pulse el botón");
+    lcd.setCursor(0, 0);
+    lcd.print("ESPIRANDO       ");
+    lcd.setCursor(0, 1);
+    lcd.print("                ");
     estado = ESPIRANDO;
   }
   else if ( estado == MENSAJE_INSPIRACION)
   {
     Serial.println("Coloque el servo, regulación de la posición INSPIRANDO");
     Serial.println("Cuando tenga el ángulo, pulse el botón");
+    lcd.setCursor(0, 0);
+    lcd.print("INSPIRANDO      ");
+    lcd.setCursor(0, 1);
+    lcd.print("                ");
     estado = INSPIRANDO;
   }
   if ( estado != FIN )
@@ -216,6 +225,11 @@ void config_loop()
       Serial.println(frecuencia);
       Serial.print("Estado: ");
       Serial.println(estado);
+      lcd.setCursor(0, 1);
+      lcd.print("ANGULO:");
+      sprintf(aux_angle,"%3d",frecuencia);
+      lcd.setCursor(12, 1);
+      lcd.print(aux_angle);
       myServo.write(frecuencia);
       frecuencia_ant = frecuencia;
     }

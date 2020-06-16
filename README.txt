@@ -4,6 +4,8 @@ Procedimiento de configuración de ajustes del servo.
 
 - Se utilizará el botón de configuración opcional.
 
+- Colocar el potenciómetro de la frecuencia hacia la mitad. En posición normal esto será una frecuencia de 32 más o menos.
+
 Cargar el programa, y abrir la consola serie. Subir el programa al arduino.
 
 En el momento en que el servo se mueva a la posición central, pulsar y mantener pulsado el botón hasta que en la consola veamos el mensaje siguiente:
